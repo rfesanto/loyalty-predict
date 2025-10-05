@@ -11,15 +11,17 @@ WITH tb_daily AS (
         idCliente,
         substr(DtCriacao, 0, 11) as dtDia 
     FROM transacoes
+    WHERE DtCriacao <= '{date}'
 ),
+
 tb_idade AS (
 SELECT 
     DISTINCT idCliente,
    -- min(dtDia) as dtPrimeiraTransacao,
    -- max(dtDia) as dtUltimaTransacao,
-    CAST(julianday('now') - julianday(min(dtDia)) AS INTEGER) as idade,
-    CAST(max(julianday('now') - julianday(dtDia)) AS INTEGER) as qtdeDiasPrimTransacao,
-    CAST(min(julianday('now') - julianday(dtDia)) AS INTEGER) as qtdeDiasUltTransacao
+    CAST(julianday('{date}') - julianday(min(dtDia)) AS INTEGER) as idade,
+    CAST(max(julianday('{date}') - julianday(dtDia)) AS INTEGER) as qtdeDiasPrimTransacao,
+    CAST(min(julianday('{date}') - julianday(dtDia)) AS INTEGER) as qtdeDiasUltTransacao
 FROM tb_daily
 GROUP BY idCliente
 ),
@@ -33,11 +35,11 @@ from tb_daily
 tb_penultima_ativacao AS (
 SELECT 
     idCliente,
-    CAST((julianday('now') - julianday(dtDia)) AS INTEGER) as qtDiasPenultimaTransacao
+    CAST((julianday('{date}') - julianday(dtDia)) AS INTEGER) as qtDiasPenultimaTransacao
 FROM tb_rn
 WHERE row_id = 2
 ),
-tb_livecycle AS (
+tb_lifecycle AS (
 select 
     t1.idCliente,
     t1.qtdeDiasPrimTransacao,
@@ -47,8 +49,8 @@ select
             WHEN qtdeDiasPrimTransacao <= 7 THEN '01-CURIOSO'
             WHEN qtdeDiasUltTransacao <= 7 AND qtDiasPenultimaTransacao - qtdeDiasUltTransacao <= 14 THEN '02-FIEL'
             WHEN qtdeDiasUltTransacao BETWEEN 8 AND 14 THEN '03-TURISTA'
-            WHEN qtdeDiasUltTransacao BETWEEN 15 AND 28 THEN '04-DESENCANTADA'
-            WHEN qtdeDiasUltTransacao > 28 THEN '05-ZUMBI'
+            WHEN qtdeDiasUltTransacao BETWEEN 15 AND 27 THEN '04-DESENCANTADA'
+            WHEN qtdeDiasUltTransacao > 27 THEN '05-ZUMBI'
             WHEN qtdeDiasUltTransacao <= 7 AND qtDiasPenultimaTransacao - qtdeDiasUltTransacao BETWEEN 15 AND 27 THEN '02-RECONQUISTADO'
             WHEN qtdeDiasUltTransacao <= 7 AND qtDiasPenultimaTransacao - qtdeDiasUltTransacao > 27 THEN '02-REBORN'
     END as desclifecycle       
@@ -57,5 +59,6 @@ left join tb_penultima_ativacao as t2
 on t1.idCliente = t2.idCliente
 )
 SELECT 
-* 
-FROM tb_livecycle
+    date('{date}','-1 day') as dtRef,
+    * 
+FROM tb_lifecycle
