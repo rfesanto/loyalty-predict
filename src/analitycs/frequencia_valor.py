@@ -38,6 +38,7 @@ df.plot(['qtdeFrequencia'], ['qtdePontosPos']
         )
 
 # %%
+## Aplicando KMeans para clusterização teorica
 kmeans = KMeans(n_clusters=5, random_state=42)
 y_pred = kmeans.fit_predict(X)
 y_pred is kmeans.labels_
@@ -54,6 +55,7 @@ plt.xlabel('Frequência')
 plt.ylabel('Valor')
 plt.grid(True)
 # %%
+## Aplicacao da clusterizacao feita no SQL a partir das definições de negocio apoiada pelo Kmeans
 sns.scatterplot(data=df, 
                 x='qtdeFrequencia', 
                 y='qtdePontosPos',

@@ -1,0 +1,1 @@
+select dtRef, idCliente, desclifecycle, cluster from life_cycle

@@ -19,6 +19,18 @@ engine_analytics = sqlalchemy.create_engine("sqlite:///../../data/analytics/data
 
 # %%
 date = [
+    '2024-01-01',
+    '2024-02-01',
+    '2024-03-01',
+    '2024-04-01',
+    '2024-05-01',
+    '2024-06-01',
+    '2024-07-01',
+    '2024-08-01',
+    '2024-09-01',
+    '2024-10-01',
+    '2024-11-01',
+    '2024-12-01',
     '2025-01-01',
     '2025-02-01',
     '2025-03-01',
@@ -30,6 +42,7 @@ date = [
     '2025-09-01',
     '2025-10-01',
     '2025-11-01',
+    '2025-12-01'
 ]
 
 for d in date:
@@ -37,9 +50,11 @@ for d in date:
     delete_query = f"DELETE FROM life_cycle WHERE dtRef = date('{d}', '-1 day')"
 
     with engine_analytics.connect() as conn:
-        conn.execute(sqlalchemy.text(delete_query))
-        conn.commit()
-
+        try:
+            conn.execute(sqlalchemy.text(delete_query))
+            conn.commit()
+        except Exception as e:
+            print(f"Error deleting data for date {d}: {e}")
     date_query = query.format(date=d)
     df = pd.read_sql_query(date_query, engine_app)
     df.to_sql("life_cycle", engine_analytics, if_exists='append', index=False)
